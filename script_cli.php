@@ -16,7 +16,7 @@
  * - showHelp(): Displays usage instructions and available commands
  * 
  * Usage:
- * php cli.php [command] [arguments]
+ * php script_cli.php [command] [arguments]
  * 
  * Available Commands:
  * - list: Show all tasks
@@ -43,7 +43,7 @@ function loadTasks(){
         $tasksData = json_decode($jsonData,true);
 
         if($tasksData){
-            foreach($tasksData as $taskData)
+            foreach($tasksData as $taskData){
                 $task = new task($taskData['name']);
                 $task->id = $taskData['id'];
                 $task->status = $taskData['status'];
@@ -53,9 +53,10 @@ function loadTasks(){
                 if ($task->id > task::$counter) {
                     task::$counter = $task->id;
                 }
+            }
         }
-    }
     return $tasks;
+    }
 }
 /**
  * Guardar tareas en archivo JSON
@@ -66,20 +67,51 @@ function saveTasks($tasks) {
 /**
  * Mostrar todas las tareas
  */
-function listTasks($tasks) {
+function listTasks() {
     echo "Lista de tareas:\n";
     echo "--------------\n";
-    
+    $tasks=[];
+    $tasks = loadTasks();
     if (empty($tasks)) {
         echo "No hay tareas registradas.\n";
         return;
     }
     
     foreach ($tasks as $task) {
-        echo "[{$task->id}] {$task->name} - Estado: {$task->status}\n";
+        echo "[{$task->id}] {$task->name} - Status: {$task->status}\n";
     }
 }
+function listTasksdone($tasks)
+{
+    echo "List of task done:\n";
+    echo "--------------\n";
 
+    if (empty($tasks)) {
+        echo "No task done.\n";
+        return;
+    }
+    foreach($tasks as $task){
+        if($task->status=='done'){
+            echo "[{$task->id}] {$task->name} - Status: {$task->status}\n";
+        }
+    }
+}
+function listTasksinprogress($tasks)
+{
+    
+    echo "List of task in progress:\n";
+    echo "--------------\n";
+
+    if (empty($tasks)) {
+        echo "No task in progress.\n";
+        return;
+    }
+    foreach($tasks as $task){
+        if($task->status=='in-progress'){
+            echo "[{$task->id}] {$task->name} - Status: {$task->status}\n";
+        }
+    }
+}
 /**
  * Ejecutar comandos según los argumentos
  */
@@ -94,35 +126,64 @@ function runCommand($argv) {
     
     $command = $argv[1];
     
-    switch ($command) {
-        case 'list':
-            listTasks($tasks);
-            break;
+    switch ($command) {      
+        
             
+        case 'list':
+            if(isset($argv[2]) && $argv[2]=='done'){
+                listTasksdone($tasks);           
+            }
+            elseif(isset($argv[2]) && $argv[2]=='in-progress'){
+                listTasksinprogress($tasks);
+            }
+            else
+            {
+                listTasks($tasks);
+            }
+            break;
+                              
+       
         case 'add':
             if (isset($argv[2])) {
                 $taskName = $argv[2];
                 $task = new task($taskName);
                 $tasks[$task->id] = $task;
                 saveTasks($tasks);
-                echo "Tarea '{$taskName}' añadida con ID: {$task->id}\n";
+                echo "Task added sucessfully (ID: {$task->id})\n";
             } else {
                 echo "Error: Debe proporcionar un nombre para la tarea.\n";
             }
             break;
-            
+        case 'update':
+            if (isset($argv[2]) && is_numeric($argv[2]) && isset($argv[3])) {
+                $taskName = $argv[3];
+                $id = (int)$argv[2];
+                if(isset($tasks[$id])){
+                    $tasks[$id]->name = $taskName;
+                    saveTasks($tasks);                    
+                }
+            }
+            break;
+        case 'delete':
+            if(isset($argv[2]) && is_numeric($argv[2])){
+                $id = (int)$argv[2];
+                if(isset($tasks[$id])){
+                    unset($tasks[$id]);
+                    saveTasks($tasks);
+                }
+            }
         case 'mark-done':
             if (isset($argv[2]) && is_numeric($argv[2])) {
                 $id = (int)$argv[2];
                 if (isset($tasks[$id])) {
                     $tasks[$id]->markAsDone();
                     saveTasks($tasks);
-                    echo "Tarea {$id} marcada como completada.\n";
+                    
                 } else {
-                    echo "Error: No se encontró la tarea con ID {$id}.\n";
+                    echo "Error: Not found task with ID {$id}.\n";
                 }
             } else {
-                echo "Error: Debe proporcionar un ID válido.\n";
+                echo "Error: Command invalid.\n";
             }
             break;
             
@@ -142,7 +203,7 @@ function runCommand($argv) {
             break;
             
         default:
-            echo "Comando desconocido: {$command}\n";
+            echo "Not found command: {$command}\n";
             showHelp();
     }
 }
