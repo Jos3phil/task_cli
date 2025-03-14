@@ -12,6 +12,9 @@
  * - loadTasks(): Loads tasks from JSON file into memory
  * - saveTasks(): Persists tasks from memory to JSON file 
  * - listTasks(): Displays all tasks with their ID, name and status
+ * - listTasksdone(): Displays all tasks with their ID, name and status done
+ * - listTasksinprogress(): Displays all tasks with their ID, name and status in progress
+ * - listTaskstodo(): Displays all tasks with their ID, name and status not done
  * - runCommand(): Main function that processes CLI arguments and executes corresponding actions
  * - showHelp(): Displays usage instructions and available commands
  * 
@@ -20,7 +23,12 @@
  * 
  * Available Commands:
  * - list: Show all tasks
+ * - list done: Show all tasks done
+ * - list in-progress: Show all tasks in progress
+ * - list todo: Show all tasks not done
  * - add "Task name": Add a new task
+ * - update ID "New task name": Update a task name
+ * - delete ID: Delete a task
  * - mark-done ID: Mark a task as completed
  * - mark-in-progress ID: Mark a task as in progress
  * 
@@ -28,7 +36,7 @@
  * - Requires task_cli.php
  * - Uses tasks.json for data persistence
  * 
- * @author Your Name
+ * @author Jos3phil
  * @version 1.0
  */
 require_once 'task_cli.php';
@@ -70,7 +78,7 @@ function saveTasks($tasks) {
 function listTasks() {
     echo "Lista de tareas:\n";
     echo "--------------\n";
-    $tasks=[];
+    
     $tasks = loadTasks();
     if (empty($tasks)) {
         echo "No hay tareas registradas.\n";
@@ -81,35 +89,75 @@ function listTasks() {
         echo "[{$task->id}] {$task->name} - Status: {$task->status}\n";
     }
 }
-function listTasksdone($tasks)
+function listTasksdone()
 {
-    echo "List of task done:\n";
-    echo "--------------\n";
-
-    if (empty($tasks)) {
+    $tasks = loadTasks();
+    $exist_task=false;
+    foreach($tasks as $task){
+        if($task->status=='done'){
+            $exist_task=true;
+            break;
+        }
+    }
+    if(!$exist_task){
         echo "No task done.\n";
         return;
     }
-    foreach($tasks as $task){
-        if($task->status=='done'){
-            echo "[{$task->id}] {$task->name} - Status: {$task->status}\n";
-        }
+    else{
+        echo "List of task done:\n";
+        echo "--------------\n";
+        foreach($tasks as $task){
+            if($task->status=='done'){
+                echo "[{$task->id}] {$task->name} - Status: {$task->status}\n";
+                }
+            }
     }
 }
-function listTasksinprogress($tasks)
+function listTasksinprogress()
 {
-    
-    echo "List of task in progress:\n";
-    echo "--------------\n";
-
-    if (empty($tasks)) {
-        echo "No task in progress.\n";
+    $tasks = loadTasks();
+    $exist_task=false;
+    foreach($tasks as $task){
+        if($task->status=='in progress'){
+            $exist_task=true;
+            break;
+        }
+    }
+    if(!$exist_task){
+        echo "No tasks in-progress.\n";
         return;
     }
+    else{
+        echo "List of task in-progress:\n";
+        echo "--------------\n";
+        foreach($tasks as $task){
+            if($task->status=='in progress'){
+                echo "[{$task->id}] {$task->name} - Status: {$task->status}\n";
+                }
+            }
+    }
+}
+function listTaskstodo(){
+    $tasks = loadTasks();
+    $exist_task=false;
     foreach($tasks as $task){
-        if($task->status=='in-progress'){
-            echo "[{$task->id}] {$task->name} - Status: {$task->status}\n";
+        if($task->status=='not done'){
+            $exist_task=true;
+            break;
         }
+    }
+    if(!$exist_task){
+        echo "No tasks todo.\n";
+        return;
+    }
+    else{
+        echo "List of task todo:\n";
+        echo "--------------\n";
+        foreach($tasks as $task){
+            if($task->status=='not done'){
+                echo "[{$task->id}] {$task->name} - Status: {$task->status}\n";
+                }
+            }
     }
 }
 /**
@@ -131,14 +179,21 @@ function runCommand($argv) {
             
         case 'list':
             if(isset($argv[2]) && $argv[2]=='done'){
-                listTasksdone($tasks);           
+                listTasksdone($tasks);   
+                break;        
             }
             elseif(isset($argv[2]) && $argv[2]=='in-progress'){
                 listTasksinprogress($tasks);
+                break;
+            }
+            elseif(isset($argv[2]) && $argv[2]=='todo'){
+                listTaskstodo($tasks);
+                break;
             }
             else
             {
                 listTasks($tasks);
+                break;
             }
             break;
                               
@@ -172,6 +227,7 @@ function runCommand($argv) {
                     saveTasks($tasks);
                 }
             }
+            break;
         case 'mark-done':
             if (isset($argv[2]) && is_numeric($argv[2])) {
                 $id = (int)$argv[2];
