@@ -1,5 +1,3 @@
-
- 
  <?php
  /**
  * Task Tracker CLI Script
@@ -118,7 +116,7 @@ function listTasksinprogress()
     $tasks = loadTasks();
     $exist_task=false;
     foreach($tasks as $task){
-        if($task->status=='in progress'){
+        if($task->status=='in-progress'){
             $exist_task=true;
             break;
         }
@@ -131,7 +129,7 @@ function listTasksinprogress()
         echo "List of task in-progress:\n";
         echo "--------------\n";
         foreach($tasks as $task){
-            if($task->status=='in progress'){
+            if($task->status=='in-progress'){
                 echo "[{$task->id}] {$task->name} - Status: {$task->status}\n";
                 }
             }
@@ -141,7 +139,7 @@ function listTaskstodo(){
     $tasks = loadTasks();
     $exist_task=false;
     foreach($tasks as $task){
-        if($task->status=='not done'){
+        if($task->status=='todo'){
             $exist_task=true;
             break;
         }
@@ -154,7 +152,7 @@ function listTaskstodo(){
         echo "List of task todo:\n";
         echo "--------------\n";
         foreach($tasks as $task){
-            if($task->status=='not done'){
+            if($task->status=='todo'){
                 echo "[{$task->id}] {$task->name} - Status: {$task->status}\n";
                 }
             }
@@ -200,8 +198,8 @@ function runCommand($argv) {
        
         case 'add':
             if (isset($argv[2])) {
-                $taskName = $argv[2];
-                $task = new task($taskName);
+                $taskDescription = $argv[2];
+                $task = new task($taskDescription);
                 $tasks[$task->id] = $task;
                 saveTasks($tasks);
                 echo "Task added sucessfully (ID: {$task->id})\n";
@@ -211,10 +209,10 @@ function runCommand($argv) {
             break;
         case 'update':
             if (isset($argv[2]) && is_numeric($argv[2]) && isset($argv[3])) {
-                $taskName = $argv[3];
+                $taskDescription = $argv[3];
                 $id = (int)$argv[2];
                 if(isset($tasks[$id])){
-                    $tasks[$id]->name = $taskName;
+                    $tasks[$id]->name = $taskDescription;
                     saveTasks($tasks);                    
                 }
             }
