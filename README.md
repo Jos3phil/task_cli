@@ -81,5 +81,5 @@ Tasks are stored in the `tasks.json` file in the same directory. This file is cr
 Jos3phil - Version 1.0
 
 ## Project URL
-GitHub Repository: https://github.com/tu-usuario/task-tracker-cli
-Note: This project was created as part of the roadmap.sh backend project challenge
+-GitHub Repository: https://github.com/tu-usuario/task-tracker-cli
+- https://roadmap.sh/projects/task-tracker
